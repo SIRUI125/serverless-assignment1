@@ -176,6 +176,7 @@ export class RestAPIStack extends cdk.Stack {
       REGION: "eu-west-1",
     }
   })
+  
         // Permissions 
         moviesTable.grantReadData(getMovieByIdFn)
         moviesTable.grantReadData(getAllMoviesFn)
