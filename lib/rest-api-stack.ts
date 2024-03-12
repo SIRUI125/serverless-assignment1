@@ -145,6 +145,22 @@ export class RestAPIStack extends cdk.Stack {
       REGION: process.env.CDK_DEFAULT_REGION || 'eu-west-1',
     },
   });
+
+  const addMovieReviewsFn = new lambdanode.NodejsFunction(
+    this, 
+    "AddMovieReviewsFn", 
+    {
+      architecture: lambda.Architecture.ARM_64, 
+      runtime: lambda.Runtime.NODEJS_16_X, 
+      entry: `${__dirname}/../lambdas/addMovieReviews.ts`, 
+      timeout: cdk.Duration.seconds(10), 
+      memorySize: 128, 
+      environment: { 
+        TABLE_NAME: movieReviewsTable.tableName, 
+        REGION: "eu-west-1", 
+      },
+    }
+  );
         // Permissions 
         moviesTable.grantReadData(getMovieByIdFn)
         moviesTable.grantReadData(getAllMoviesFn)
@@ -153,6 +169,7 @@ export class RestAPIStack extends cdk.Stack {
         movieCastsTable.grantReadData(getMovieCastMembersFn);
         movieCastsTable.grantReadData(getMovieByIdFn);
         movieReviewsTable.grantReadData(getMovieReviewsFn);
+        movieReviewsTable.grantReadWriteData(addMovieReviewsFn);
         const api = new apig.RestApi(this, "RestAPI", {
           description: "demo api",
           deployOptions: {
@@ -185,13 +202,22 @@ export class RestAPIStack extends cdk.Stack {
           "DELETE",
           new apig.LambdaIntegration(deleteMovieFn, {proxy: true})
         )
+        const movieReviewsEndpoint = movieEndpoint.addResource("reviews");
+        movieReviewsEndpoint.addMethod(
+          "POST",
+          new apig.LambdaIntegration(addMovieReviewsFn, { proxy: true })
+        );
+
         const movieCastEndpoint = moviesEndpoint.addResource("cast");
         movieCastEndpoint.addMethod(
             "GET",
             new apig.LambdaIntegration(getMovieCastMembersFn, { proxy: true })
         );
+
         const reviewsEndpoint = moviesEndpoint.addResource("reviews");
-        reviewsEndpoint.addMethod("GET", new apig.LambdaIntegration(getMovieReviewsFn, { proxy: true }));
+        reviewsEndpoint.addMethod(
+          "GET", 
+          new apig.LambdaIntegration(getMovieReviewsFn, { proxy: true }));
       }
     }
     
