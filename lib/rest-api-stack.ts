@@ -134,17 +134,6 @@ export class RestAPIStack extends cdk.Stack {
     }
   );
         
-  const getMovieReviewsFn = new lambdanode.NodejsFunction(this, "GetMovieReviewsFn", {
-    architecture: lambda.Architecture.ARM_64,
-    runtime: lambda.Runtime.NODEJS_18_X,
-    entry: `${__dirname}/../lambdas/getAllMoviesReviews.ts`, 
-    timeout: cdk.Duration.seconds(10),
-    memorySize: 128,
-    environment: {
-      TABLE_NAME: movieReviewsTable.tableName,
-      REGION: process.env.CDK_DEFAULT_REGION || 'eu-west-1',
-    },
-  });
 
   const addMovieReviewsFn = new lambdanode.NodejsFunction(
     this, 
@@ -161,15 +150,30 @@ export class RestAPIStack extends cdk.Stack {
       },
     }
   );
+  const getMovieReviewsByIdFn = new lambdanode.NodejsFunction(
+    this, 
+    "GetMovieReviewsByIdFn", 
+    {
+      architecture: lambda.Architecture.ARM_64, 
+      runtime: lambda.Runtime.NODEJS_16_X, 
+      entry: `${__dirname}/../lambdas/getMovieReviewsById.ts`, 
+      timeout: cdk.Duration.seconds(10), 
+      memorySize: 128, 
+      environment: { 
+        TABLE_NAME: movieReviewsTable.tableName, 
+        REGION: "eu-west-1", 
+      },
+    }
+  );
         // Permissions 
         moviesTable.grantReadData(getMovieByIdFn)
         moviesTable.grantReadData(getAllMoviesFn)
         moviesTable.grantReadWriteData(newMovieFn)
         moviesTable.grantReadWriteData(deleteMovieFn)
         movieCastsTable.grantReadData(getMovieCastMembersFn);
-        movieCastsTable.grantReadData(getMovieByIdFn);
-        movieReviewsTable.grantReadData(getMovieReviewsFn);
+        movieCastsTable.grantReadData(getMovieByIdFn);;
         movieReviewsTable.grantReadWriteData(addMovieReviewsFn);
+        movieReviewsTable.grantReadData(getMovieReviewsByIdFn);
         const api = new apig.RestApi(this, "RestAPI", {
           description: "demo api",
           deployOptions: {
@@ -188,7 +192,7 @@ export class RestAPIStack extends cdk.Stack {
           "GET",
           new apig.LambdaIntegration(getAllMoviesFn, { proxy: true })
         );
-    
+
         const movieEndpoint = moviesEndpoint.addResource("{movieId}");
         movieEndpoint.addMethod(
           "GET",
@@ -204,8 +208,8 @@ export class RestAPIStack extends cdk.Stack {
         )
         const movieReviewsEndpoint = movieEndpoint.addResource("reviews");
         movieReviewsEndpoint.addMethod(
-          "POST",
-          new apig.LambdaIntegration(addMovieReviewsFn, { proxy: true })
+          "GET",
+          new apig.LambdaIntegration(getMovieReviewsByIdFn, { proxy: true })
         );
 
         const movieCastEndpoint = moviesEndpoint.addResource("cast");
@@ -215,9 +219,10 @@ export class RestAPIStack extends cdk.Stack {
         );
 
         const reviewsEndpoint = moviesEndpoint.addResource("reviews");
-        reviewsEndpoint.addMethod(
-          "GET", 
-          new apig.LambdaIntegration(getMovieReviewsFn, { proxy: true }));
+          reviewsEndpoint.addMethod(
+            "POST",
+            new apig.LambdaIntegration(addMovieReviewsFn, { proxy: true })
+          );
       }
     }
     
