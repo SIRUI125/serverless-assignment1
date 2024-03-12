@@ -10,6 +10,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const movieId = event.pathParameters?.movieId;
     const minRating = event.queryStringParameters?.minRating;
     const reviewerName = event.pathParameters?.reviewerName;
+    const year = event.queryStringParameters?.year;
     if (!movieId) {
       return {
         statusCode: 400,
@@ -27,6 +28,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           ":movieId": parseInt(movieId),
           ...(minRating ? { ":minRating": parseInt(minRating) } : {}),
           ...(reviewerName ? { ":reviewerName": reviewerName } : {}),
+          ...(year && { ":year": year }),
         },
     };
 
@@ -42,6 +44,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     if (reviewerName) {
       queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Reviewername = :reviewerName';
   }
+  if (year) {
+    queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'begins_with(ReviewDate, :year)';
+}
     if (!queryInput.FilterExpression) {
       delete queryInput.FilterExpression;
     }

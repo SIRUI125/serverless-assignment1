@@ -175,7 +175,17 @@ export class RestAPIStack extends cdk.Stack {
       TABLE_NAME: movieReviewsTable.tableName,
       REGION: "eu-west-1",
     }
-  })
+  });
+  const getMovieReviewsByYearFn = new lambdanode.NodejsFunction(this, "GetMovieReviewsByYearFn", {
+    architecture: lambda.Architecture.ARM_64,
+    runtime: lambda.Runtime.NODEJS_18_X,
+    handler: 'handler',
+    entry: `${__dirname}/../lambdas/getMovieReviewsByYear.ts`,
+    environment: {
+      TABLE_NAME: movieReviewsTable.tableName,
+      REGION: "eu-west-1",
+    },
+  });
   
         // Permissions 
         moviesTable.grantReadData(getMovieByIdFn)
@@ -187,6 +197,7 @@ export class RestAPIStack extends cdk.Stack {
         movieReviewsTable.grantReadWriteData(addMovieReviewsFn);
         movieReviewsTable.grantReadData(getMovieReviewsByIdFn);
         movieReviewsTable.grantReadWriteData(updateMovieReviewFn);
+        movieReviewsTable.grantReadData(getMovieReviewsByYearFn);
         const api = new apig.RestApi(this, "RestAPI", {
           description: "demo api",
           deployOptions: {
