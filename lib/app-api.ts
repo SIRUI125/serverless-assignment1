@@ -8,6 +8,7 @@ import * as node from "aws-cdk-lib/aws-lambda-nodejs";
 import {generateBatch} from "../shared/util";
 import {movies, movieCasts, movieReviews} from "../seed/movies";
 import * as lambdanode from "aws-cdk-lib/aws-lambda-nodejs";
+import * as iam from 'aws-cdk-lib/aws-iam';
 type AppApiProps = {
   userPoolId: string;
   userPoolClientId: string;
@@ -200,7 +201,7 @@ export class AppApi extends Construct {
     const getReviewsByYearFn = new lambdanode.NodejsFunction(this, "GetReviewsByYearFn", {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'handler',
-      entry: `${__dirname}/../lambdas/getReviewsByYear.ts`,
+      entry: `${__dirname}/../lambdas/getMovieReviewsByYear.ts`,
       environment: {
         TABLE_NAME: movieReviewsTable.tableName,
         REGION: "eu-west-1",
@@ -227,6 +228,30 @@ export class AppApi extends Construct {
         REGION: 'eu-west-1',
       },
     });
+    const translateServiceRole = new iam.Role(this, 'TranslateServiceRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonDynamoDBReadOnlyAccess'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('TranslateReadOnly')
+      ],
+    });
+
+
+    const getReviewTranslationFn = new node.NodejsFunction(this, "GetReviewTranslationFn", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      role: translateServiceRole,
+      entry: `${__dirname}/../lambdas/translation.ts`,
+      environment: {
+        TABLE_NAME: movieReviewsTable.tableName,
+        TRANSLATE_SERVICE_ROLE: translateServiceRole.roleArn,
+        REGION: process.env.CDK_DEFAULT_REGION || 'eu-west-1',
+      },
+    });
+    const translatePolicy = new iam.PolicyStatement({
+      actions: ["translate:TranslateText"], 
+      resources: ["*"], 
+  });
           // Permissions 
           moviesTable.grantReadData(getMovieByIdFn)
           moviesTable.grantReadData(getAllMoviesFn)
@@ -239,7 +264,9 @@ export class AppApi extends Construct {
           movieReviewsTable.grantReadData(getMovieReviewsByIdFn);
           movieReviewsTable.grantReadData(getReviewsByYearFn);
           movieReviewsTable.grantReadWriteData(updateMovieReviewFn);
-          movieReviewsTable.grantReadData(getReviewsByNameFn)
+          movieReviewsTable.grantReadData(getReviewsByNameFn);
+          getReviewTranslationFn.addToRolePolicy(translatePolicy);
+          movieReviewsTable.grantReadData(getReviewTranslationFn);
           const api = new apig.RestApi(this, "RestAPI", {
             description: "demo api",
             deployOptions: {
@@ -337,6 +364,11 @@ export class AppApi extends Construct {
           reviewerEndpoint.addMethod(
           "GET",
           new apig.LambdaIntegration(getReviewsByNameFn, { proxy: true }));
+        const TranslationEndpoint = reviewerEndpoint.addResource("{movieId}").addResource("translation");
+          TranslationEndpoint.addMethod(
+          'GET', 
+          new apig.LambdaIntegration(getReviewTranslationFn));
+          
            
           const protectedRes = appApi.root.addResource("protected");
 
@@ -351,6 +383,7 @@ export class AppApi extends Construct {
             ...appCommonFnProps,
             entry: "./lambdas/public.ts",
           });
+          
       
           publicRes.addMethod("GET", new apig.LambdaIntegration(publicFn));
         }
