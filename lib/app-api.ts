@@ -197,6 +197,15 @@ export class AppApi extends Construct {
         },
       }
     );
+    const getReviewsByYearFn = new lambdanode.NodejsFunction(this, "GetReviewsByYearFn", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'handler',
+      entry: `${__dirname}/../lambdas/getReviewsByYear.ts`,
+      environment: {
+        TABLE_NAME: movieReviewsTable.tableName,
+        REGION: "eu-west-1",
+      },
+    });
     const updateMovieReviewFn = new lambdanode.NodejsFunction(this, "UpdateMovieReviewFn", {
       architecture: lambda.Architecture.ARM_64,
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -208,16 +217,7 @@ export class AppApi extends Construct {
         REGION: "eu-west-1",
       }
     });
-    const getMovieReviewsByYearFn = new lambdanode.NodejsFunction(this, "GetMovieReviewsByYearFn", {
-      architecture: lambda.Architecture.ARM_64,
-      runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'handler',
-      entry: `${__dirname}/../lambdas/getMovieReviewsByYear.ts`,
-      environment: {
-        TABLE_NAME: movieReviewsTable.tableName,
-        REGION: "eu-west-1",
-      },
-    });
+
     const getReviewsByNameFn = new lambdanode.NodejsFunction(this, "GetReviewsByReviewerFn", {
       architecture: lambda.Architecture.ARM_64,
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -237,8 +237,8 @@ export class AppApi extends Construct {
           movieReviewsTable.grantReadWriteData(addMovieReviewsFn);
           movieReviewsTable.grantReadData(getAllReviewsFn)
           movieReviewsTable.grantReadData(getMovieReviewsByIdFn);
+          movieReviewsTable.grantReadData(getReviewsByYearFn);
           movieReviewsTable.grantReadWriteData(updateMovieReviewFn);
-          movieReviewsTable.grantReadData(getMovieReviewsByYearFn);
           movieReviewsTable.grantReadData(getReviewsByNameFn)
           const api = new apig.RestApi(this, "RestAPI", {
             description: "demo api",
@@ -299,7 +299,11 @@ export class AppApi extends Construct {
           "GET",
           new apig.LambdaIntegration(getMovieReviewsByIdFn, { proxy: true })
         );
-        movieReviewsEndpoint.addMethod(
+        const reviewersEndpoint = movieReviewsEndpoint.addResource("{reviewerName}")
+          reviewersEndpoint.addMethod(
+          "GET",
+          new apig.LambdaIntegration(getReviewsByNameFn, { proxy: true }));
+          reviewersEndpoint.addMethod(
           'PUT', 
           new apig.LambdaIntegration(updateMovieReviewFn, {proxy: true}),
           {
@@ -309,7 +313,7 @@ export class AppApi extends Construct {
           );
 
         const movieCastEndpoint = moviesEndpoint.addResource("cast");
-        movieCastEndpoint.addMethod(
+         movieCastEndpoint.addMethod(
           "GET",
             new apig.LambdaIntegration(getMovieCastMembersFn, { proxy: true })
         );
