@@ -20,7 +20,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         body: JSON.stringify({ message: "Movie ID is required in the path" }),
       };
     }
-
     const queryInput: QueryCommandInput = {
         TableName: process.env.TABLE_NAME,
         KeyConditionExpression: "MovieId = :movieId",
@@ -30,28 +29,28 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           ...(reviewerName ? { ":reviewerName": reviewerName } : {}),
           ...(year && { ":year": year }),
         },
+        FilterExpression: '', 
     };
-
+    
+    
     if (minRating) {
-      queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Rating > :minRating';
-  }
+        queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Rating > :minRating';
+    }
+    
     if (reviewerName) {
-      queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Reviewername = :reviewerName';
-  }
-    if (!queryInput.FilterExpression) {
-      delete queryInput.FilterExpression;
-  }
-    if (reviewerName) {
-      queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Reviewername = :reviewerName';
-  }
-  if (year) {
-    queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'begins_with(ReviewDate, :year)';
-}
-    if (!queryInput.FilterExpression) {
-      delete queryInput.FilterExpression;
+        queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'Reviewername = :reviewerName';
     }
 
+    if (year) {
+      queryInput.FilterExpression += (queryInput.FilterExpression ? ' and ' : '') + 'begins_with(ReviewDate, :year)';
+  }
+
+    
+    if (!queryInput.FilterExpression) {
+        delete queryInput.FilterExpression;
+    }
     const queryOutput = await ddbDocClient.send(new QueryCommand(queryInput));
+
     if (!queryOutput.Items || queryOutput.Items.length === 0) {
       return {
         statusCode: 404,
