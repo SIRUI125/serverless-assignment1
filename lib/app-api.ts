@@ -159,21 +159,17 @@ export class AppApi extends Construct {
     );
           
   
-    const addMovieReviewsFn = new lambdanode.NodejsFunction(
-      this, 
-      "AddMovieReviewsFn", 
-      {
-        architecture: lambda.Architecture.ARM_64, 
-        runtime: lambda.Runtime.NODEJS_16_X, 
-        entry: `${__dirname}/../lambdas/addMovieReviews.ts`, 
-        timeout: cdk.Duration.seconds(10), 
-        memorySize: 128, 
-        environment: { 
-          TABLE_NAME: movieReviewsTable.tableName, 
-          REGION: "eu-west-1", 
-        },
-      }
-    );
+    const addMovieReviewFn = new lambdanode.NodejsFunction(this, "AddMovieReviewFn", {
+      architecture: lambda.Architecture.ARM_64,
+      runtime: lambda.Runtime.NODEJS_18_X, 
+      entry: `${__dirname}/../lambdas/addMovieReviews.ts`, 
+      timeout: cdk.Duration.seconds(10),
+      memorySize: 128,
+      environment: {
+        TABLE_NAME: movieReviewsTable.tableName, 
+        REGION: "eu-west-1", 
+      },
+    });
     const getAllReviewsFn = new lambdanode.NodejsFunction(this, "GetAllReviewsFn", {
       architecture: lambda.Architecture.ARM_64,
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -259,7 +255,7 @@ export class AppApi extends Construct {
           moviesTable.grantReadWriteData(deleteMovieFn)
           movieCastsTable.grantReadData(getMovieCastMembersFn);
           movieCastsTable.grantReadData(getMovieByIdFn);;
-          movieReviewsTable.grantReadWriteData(addMovieReviewsFn);
+          movieReviewsTable.grantReadWriteData(addMovieReviewFn);
           movieReviewsTable.grantReadData(getAllReviewsFn)
           movieReviewsTable.grantReadData(getMovieReviewsByIdFn);
           movieReviewsTable.grantReadData(getReviewsByYearFn);
@@ -348,7 +344,7 @@ export class AppApi extends Construct {
         const reviewsEndpoint = moviesEndpoint.addResource("reviews");
           reviewsEndpoint.addMethod(
           "POST",
-            new apig.LambdaIntegration(addMovieReviewsFn, { proxy: true }),
+            new apig.LambdaIntegration(addMovieReviewFn, { proxy: true }),
             {
                 authorizer: requestAuthorizer,
                 authorizationType: apig.AuthorizationType.CUSTOM,
