@@ -27,7 +27,8 @@ API endpoints.
 + GET /reviews/{reviewerName}/{movieId}/translation?language=code - Get a translated version of a movie review using the movie ID and reviewer name as the identifier.
 
 API Gateway
-![alt text](APIs.png)
+<img width="1275" alt="APIs" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/c2803764-d540-4152-8c5d-7f314630664b">
+
 
 ![alt text](<API Gateway1.png>)
 
