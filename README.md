@@ -1,7 +1,7 @@
 Serverless REST Assignment.
 Name: Sirui Yao
 
-Video demonstration: ..... URL of your Youtube video demonstration ....
+Video demonstration: https://youtu.be/daKVCaFZRJ0
 
 This repository contains an implementation of a serverless REST API for the AWS platform. The CDK framework is used to provision its infrastructure. The API's domain context is movie reviews.
 
