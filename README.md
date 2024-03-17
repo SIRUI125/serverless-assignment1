@@ -30,19 +30,25 @@ API Gateway
 <img width="1275" alt="APIs" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/c2803764-d540-4152-8c5d-7f314630664b">
 
 
-![alt text](<API Gateway1.png>)
+<img width="1270" alt="API Gateway1" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/a7443d77-2d93-4164-afb3-a8267ce72728">
 
-![alt text](<API Gateway2.png>)
 
-![alt text](<API Gateway3.png>)
+<img width="1280" alt="API Gateway2" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/acb77cbe-56ca-4101-a90d-508ee14bb0d2">
+
+<img width="1271" alt="API Gateway3" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/713aa7a6-4d5e-4072-8f81-5f40bc67b06e">
+
+
 
 Authentication (if relevant).
-![alt text](Authentication.png)
+<img width="1278" alt="Authentication" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/0ef38f09-984e-4a83-86f1-9c92babe4cce">
+
 
 Independent learning (If relevant).
-![alt text](<Translation in Chinese.png>)
+<img width="1277" alt="Translation in Chinese" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/71a81b37-8bb7-4d64-8dd3-0c53579f877f">
 
-![alt text](<Translantion in French.png>)
+
+<img width="1280" alt="Translantion in French" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/51eeed01-dd18-4b26-8671-0d25e679441a">
+
 
 I use this guideline website "https://completecoding.io/typescript-translation-api/" to learn how to apply translation in typescript api.After I add translation function to my api.I use language codes website "https://www.alchemysoftware.com/livedocs/ezscript/Topics/Catalyst/Language.htm" to find specific codes of some countries.And I can translate my reviews into other languages.
 
