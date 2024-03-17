@@ -6,7 +6,6 @@ Video demonstration: https://youtu.be/daKVCaFZRJ0
 This repository contains an implementation of a serverless REST API for the AWS platform. The CDK framework is used to provision its infrastructure. The API's domain context is movie reviews.
 
 API endpoints.
-[ Provide a bullet-point list of the app's endpoints (excluding the Auth API endpoints you have successfully implemented in full. Omit those in the assignment specification that you did not complete.] e.g.
 
 + POST /movies/reviews - add a movie review.
 
@@ -29,14 +28,11 @@ API endpoints.
 API Gateway
 <img width="1275" alt="APIs" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/c2803764-d540-4152-8c5d-7f314630664b">
 
-
 <img width="1270" alt="API Gateway1" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/a7443d77-2d93-4164-afb3-a8267ce72728">
-
 
 <img width="1280" alt="API Gateway2" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/acb77cbe-56ca-4101-a90d-508ee14bb0d2">
 
 <img width="1271" alt="API Gateway3" src="https://github.com/SIRUI125/serverless-assignment1/assets/144785434/713aa7a6-4d5e-4072-8f81-5f40bc67b06e">
-
 
 
 Authentication (if relevant).
